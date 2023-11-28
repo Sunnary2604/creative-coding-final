@@ -9,7 +9,11 @@ import colorsys
 app = Flask(__name__)
 CORS(app)
 # openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = "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"
+# read the api key from the file
+key_path = "./api.txt"
+with open(key_path, 'r') as f:
+    openai.api_key = f.read().strip()
+    
 
 os.environ["http_proxy"] = "127.0.0.1:7890"
 os.environ["https_proxy"] = "127.0.0.1:7890"
