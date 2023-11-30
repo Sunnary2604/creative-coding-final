@@ -76,7 +76,6 @@ function draw() {
   if (time > 20) {
     time = 20;
   }
-  console.log(step, time);
   // if typed "riught arrow" once
   if (keyIsDown(39) && interaction_time > 10) {
     if (step == 0 && t == 10) step += 1;
@@ -186,16 +185,13 @@ function drawSCurve(startX, startY, endX, endY, iteration) {
   let height = endY - startY;
 
   // Control points for the S-curve
-
   let ctrl1X = (width / 4) * random(0.5, 1.5);
   let ctrl1Y = (-height / 2) * random(0.5, 1.5);
   let ctrl2X = ((3 * width) / 4) * random(0.5, 1.5);
   let ctrl2Y = (height / 2) * random(0.5, 1.5);
 
   // Drawing the bezier curve
-
   bezier(0, 0, ctrl1X, ctrl1Y, ctrl2X, ctrl2Y, width, 0);
-
   let draw_double = false;
   if (iteration < 2) {
     draw_double = true;
@@ -205,34 +201,9 @@ function drawSCurve(startX, startY, endX, endY, iteration) {
     bezier(0, 0, ctrl2X, ctrl2Y, ctrl1X, ctrl1Y, width, 0);
     pop();
   }
-
   pop();
 }
 
-function recursiveCircle(x, y, size, opecity, recursive_level) {
-  push();
-
-  translate(x, y);
-  fill(255, 255, 255, opecity);
-  stroke(color(255, 255, 255, opecity));
-  // use noise to change the size of the circle
-  let offset_x = noise(x / 100, frameCount / 100) * 10;
-  let offset_y = noise(y / 100, frameCount / 100) * 10;
-  s = map(abs(time - 15), 5, 0, 10, size);
-  // add text from related words
-  if (size > 20 && step == 3)
-    if (related_words.length > 0) {
-      let index = floor(random(related_words.length));
-      let word = related_words[index];
-      textSize(20);
-      text(word, offset_x, offset_y);
-    }
-  if (step <= 2) {
-    circle(offset_x, offset_y, s);
-  }
-
-  pop();
-}
 // Adds leaf nodes at the end of smaller branches
 function drawLeaves(len, recursive_level) {
   push();
@@ -246,7 +217,7 @@ function drawLeaves(len, recursive_level) {
     buffer = time - 9;
   }
   if (recursive_level == MAXITERATION - 1) {
-    recursiveCircle(
+    leafWithTextV1(
       0,
       -len * buffer,
       len * random(0.8, 1),
@@ -254,7 +225,7 @@ function drawLeaves(len, recursive_level) {
       recursive_level
     );
   } else if (random(1) > recursive_level * 0.05) {
-    recursiveCircle(
+    leafWithTextV1(
       0,
       -len * buffer,
       len * random(0.8, 1),
