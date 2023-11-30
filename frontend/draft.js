@@ -12,7 +12,7 @@ let wind = 0; // Wind effect on branches
 let backgroundImg;
 let iteration = 0;
 let t = 0;
-let MAXITERATION = 9;
+let MAXITERATION = 8;
 let TRANSITIONTIME = 50;
 let renderSize = false;
 let time = 0,
@@ -32,12 +32,30 @@ let related_words = [
   "strength",
   "energy",
 ];
+let prayerPoem = [
+  "In the quiet whispers of the morning light, I send forth a prayer, a beacon so bright.",
+  "For wellness to envelop me, a comforting shroud, In its gentle embrace, serene and unbowed.",
+  "May fitness grace my limbs, a dance of might, With each step, a testament to an enduring fight.",
+  "Vitality, surge through me like a river so bold, In your sparkling currents, my story unfolds.",
+  "Grant me well-being, a balance so true, A harmony of spirit, in skies of endless blue.",
+  "May my condition be steady, my state ever fair, In the garden of health, under tender care.",
+  "Stamina, be my ally in the journey ahead, Through trials and triumphs, by you I am led.",
+  "Robustness, infuse me with your resilient charm, A fortress within, shielding me from harm.",
+  "Vigor, awaken in me a vibrant song, A melody of life, where I truly belong.",
+  "Soundness of mind and body, a treasure so rare, In your wisdom, guide me with gentle care.",
+  "Strength, be the foundation on which I stand, A pillar of courage, sculpted by a masterful hand.",
+  "Energy, ignite my soul with your fiery spark, A beacon to guide me through light and dark.",
+  "In this prayer, these words I weave, A tapestry of hope, in which I believe.",
+  "May this wish for health, in its purest form, Be granted, be nurtured, be wonderfully warm."
+];
+
+
 let step = 0;
 let imagesource = [];
 function preload() {
   // load images
   backgroundImg = loadImage("assets/image/background.jpg");
-  font = loadFont("assets/font/Kristi.ttf");
+  font = loadFont("assets/font/EraserRegular.ttf");
 }
 // Initializes canvas and base settings
 function setup() {
@@ -109,6 +127,7 @@ function draw() {
   renderBackground();
   randomSeed(seed);
   branch(50, t * 1.6, 0);
+  renderPoems(prayerPoem, 0, 0);
 }
 
 function renderBackground() {
