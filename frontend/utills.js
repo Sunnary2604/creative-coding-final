@@ -17,16 +17,16 @@ function leafWithTextV1(x, y, size, opecity, recursive_level) {
   // time is tge global variable that is used to control the animation
   s = map(abs(time - 15), 5, 0, 10, size);
   // add text from related words
-  if (size > 20 && step == 3)
-    if (related_words.length > 0) {
-      let index = floor(random(related_words.length));
-      let word = related_words[index];
-      textSize(20);
-      text(word, offset_x, offset_y);
-    }
-  if (step <= 2) {
-    circle(offset_x, offset_y, s);
-  }
+  // if (size > 20 && step == 3)
+  //   if (related_words.length > 0) {
+  //     let index = floor(random(related_words.length));
+  //     let word = related_words[index];
+  //     textSize(20);
+  //     text(word, offset_x, offset_y);
+  //   }
+  // if (step <= 2) {
+  circle(offset_x, offset_y, s);
+  // }
 
   pop();
 }
@@ -34,10 +34,10 @@ function leafWithTextV1(x, y, size, opecity, recursive_level) {
 // make the animation not simple linear transition
 function leafWithTextV2(x, y, size, opecity, recursive_level) {}
 /**
- * 
- * @param {Array} prayers 
- * @param {Number} x 
- * @param {Number} y 
+ *
+ * @param {Array} prayers
+ * @param {Number} x
+ * @param {Number} y
  */
 function renderPoemsV1(prayers, x, y) {
   push();
@@ -60,11 +60,11 @@ function renderPoemsV1(prayers, x, y) {
 function renderPoemsV2(prayers, x, y) {}
 
 /**
- * 
- * @param {Number} x 
- * @param {Number} y 
- * @param {Number} radius 
- * @param {String} txt 
+ *
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} radius
+ * @param {String} txt
  */
 function rotateText(x, y, radius, txt) {
   // Comment the following line to hide debug objects

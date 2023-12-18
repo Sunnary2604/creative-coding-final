@@ -1,11 +1,10 @@
-import datetime
+
 import json
 import os
 import re
 import openai
 from flask import Flask, redirect, render_template, request, url_for
 from flask_cors import CORS
-import colorsys
 app = Flask(__name__)
 CORS(app)
 # openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -22,50 +21,100 @@ print("开始了")
 messages = []
 
 
-
-@app.route("/getdata", methods=("GET", "POST"))
-def getdata():
+@app.route("/getKeywords", methods=("GET", "POST"))
+def getKeywords():
     if request.method == "POST":
         data = request.get_data().decode("utf-8")
-        print(data)
         result = json.loads(data)
         user_input = result["user_input"]
         append_message(
-            "user", generate_prompt(user_input))
+            "user", generate_prompt_keywords(user_input))
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
         )
-        
-        log_used_prompt(response, "Step1: Get the description")
+        log_used_prompt(response, "Step1: GEt Related Keywords")
         append_message("assistant", response.choices[0].message.content)
         return response.choices[0].message.content
     result = request.args.get("result")
     return result
 
-def generate_prompt(user_input):
-    prompt = """Please give me some similar words with the keyword in the given context.
+def generate_prompt_keywords(user_input):
+    few_shot=formalize_few_shot_prompt("./prompt/Step1-keyword.json")
+    prompt = """Think as a creative story writer. I am writing an exciting story. Please brainstorm 3 elements that relate to the keyword and be the symble of the keyword. Be surprising, and be careful not to use the most direct and simple associations. Keep the word simple to understand for nont-native speakers. Give me the structured result in list, following the example below:
+    {}
     Input: {}
-    Output:""".format(user_input)
+    Output:""".format(few_shot,user_input)
     return prompt
 
-def create_prompt_generate_concepts(description, mode):
-    prompt = ""
-    color_psychology = ""
-    print(mode)
-    if(mode == "ColorMood"):
-        prompt = formalize_few_shot_prompt(
-            "./datasets/prompts/Alternative_Step1_without_ColorMood.json", -1)
-    else:
-        prompt = formalize_few_shot_prompt(
-            "./datasets/prompts/Step1_prompt_generate_concepts.json", -1)
-        color_psychology = load_prompt(
-            "./datasets/prompts/Domain_Knowledge_color_psychology.txt")
-    return """Please think as an interior designer. Now I wish to design the interior color of a room. Please generate 5 design theme related to the design requirement. {}
-    {}
-    Input:{},
-    Output:""".format(color_psychology, prompt, description)
 
+
+@app.route("/getStory", methods=("GET", "POST"))
+def getStory():
+    if request.method == "POST":
+        data = request.get_data().decode("utf-8")
+        result = json.loads(data)
+        keywords = result["keywords"]
+
+        append_message(
+            "user", generate_prompt_story(keywords))
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+        )
+        log_used_prompt(response, "Step2: Get story")
+        append_message("assistant", response.choices[0].message.content)
+        return response.choices[0].message.content
+    result = request.args.get("result")
+    return result
+
+def generate_prompt_story(keywords):
+    # read file
+    #
+    structure= load_prompt("./prompt/Domain-Knowledge.txt")
+    few_shot=formalize_few_shot_prompt("./prompt/Step2-story.json")
+    prompt = """Imagine you're a storyteller. 
+    [Instruction]:Please using the five keyword, write a narative 5 line poem with the following structure {}. The poem should be about making a with come true. Each sentence should not more than 10 words. Only use one sentence for each part, corrosponsing to one keyword. Make the poem as interesting as possible, and coherent.
+     {}
+    Input:{}
+    Output:
+    :""".format(structure,few_shot,keywords)
+    return prompt
+
+
+
+
+@app.route("/checkStory", methods=("GET", "POST"))
+def checkStory():
+    if request.method == "POST":
+        data = request.get_data().decode("utf-8")
+        result = json.loads(data)
+        story = result["story"]
+        keywords = result["keywords"]
+    
+       
+        append_message(
+            "user", generate_prompt_check(story,keywords))
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+        )
+        log_used_prompt(response, "Step2: Get story")
+        append_message("assistant", response.choices[0].message.content)
+        return response.choices[0].message.content
+    result = request.args.get("result")
+    return result
+
+def generate_prompt_check(story,keywords):
+    # read file
+    #
+    few_shot=formalize_few_shot_prompt("./prompt/Step3-evaluate.json")
+    prompt = """Imagine you're a storyteller. 
+    Evaluate the following poem, to what extent (1-5) does the poem is a good poem. Only give the number.
+    Poem: {}
+    Output of number:
+    :""".format(story)
+    return prompt
 
 
 
@@ -92,25 +141,19 @@ def append_message(role, content):
 
 
 
-def formalize_few_shot_prompt(path, room_id):
+def formalize_few_shot_prompt(path):
     with open(path, 'r') as f:
         content = f.read()
         # change content to json
         content = json.loads(content)
         # for each example in the prompt, change to string
         prompt = ""
-        if room_id == -1:
-            for example in content:
-                example["input"] = json.dumps(example["input"])
-                example["output"] = json.dumps(example["output"])
-                prompt += ("Input: "+example["input"])
-                prompt += ("Output: "+example["output"])
-        else:
-            for example in content[room_id]:
-                example["input"] = json.dumps(example["input"])
-                example["output"] = json.dumps(example["output"])
-                prompt += ("Input: "+example["input"])
-                prompt += ("Output: "+example["output"])
+        for example in content:
+            example["input"] = json.dumps(example["input"])
+            example["output"] = json.dumps(example["output"])
+            prompt += ("Example Input: "+example["input"] + "\n")
+
+            prompt += ("Example Output: "+example["output"]+ "\n")
     return prompt
 
 

@@ -1,0 +1,10 @@
+[
+  {
+    "input": "Health",
+    "output": ["Crystal", "Garden", "Whispering Breeze"]
+  },
+  {
+    "input": "Wealthy",
+    "output": ["Golden Phoenix", "Eternal Fountain", "Coins"]
+  }
+]
