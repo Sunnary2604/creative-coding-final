@@ -7,8 +7,6 @@ from flask import Flask, redirect, render_template, request, url_for
 from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
-# openai.api_key = os.getenv("OPENAI_API_KEY")
-# read the api key from the file
 key_path = "./api.txt"
 with open(key_path, 'r') as f:
     openai.api_key = f.read().strip()
@@ -16,9 +14,37 @@ with open(key_path, 'r') as f:
 
 os.environ["http_proxy"] = "127.0.0.1:7890"
 os.environ["https_proxy"] = "127.0.0.1:7890"
-print("开始了")
 
 messages = []
+
+@app.route("/initiate", methods=("GET", "POST"))
+def initiate():
+    if request.method == "POST":
+        data = request.get_data().decode("utf-8")
+        result = json.loads(data)
+        keyword= result["keyword"]
+
+       
+        append_message(
+            "user", generate_prompt_initiate(keyword))
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+        )
+        log_used_prompt(response, "Step0: Get story")
+        append_message("assistant", response.choices[0].message.content)
+        return response.choices[0].message.content
+    result = request.args.get("result")
+    return result
+
+def generate_prompt_initiate(keyword):
+    few_shot=formalize_few_shot_prompt("./prompt/Step0-initiate.json")
+    store = ["Rich", "Healthy", "Loved", "Successful", "Happy", "Wealthy", "Prosperous", "Content", "Fulfilled", "Peaceful", "Strong", "Wise", "Generous", "Lucky", "Creative", "Confident", "Independent", "Adventurous", "Grateful", "Inspiring"]
+
+    prompt = """Imagine you're a storyteller. Give one simple short description about the wish of the keyword{}. Also return 3 related keywords include but not limited in the list {}. Here are some examples:
+    {}
+    :""".format(keyword, store,few_shot)
+    return prompt
 
 
 @app.route("/getKeywords", methods=("GET", "POST"))
@@ -90,11 +116,11 @@ def checkStory():
         data = request.get_data().decode("utf-8")
         result = json.loads(data)
         story = result["story"]
-        keywords = result["keywords"]
+        wish = result["wish"]
     
        
         append_message(
-            "user", generate_prompt_check(story,keywords))
+            "user", generate_prompt_check(story,wish))
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -105,15 +131,15 @@ def checkStory():
     result = request.args.get("result")
     return result
 
-def generate_prompt_check(story,keywords):
+def generate_prompt_check(story,wish):
     # read file
     #
     few_shot=formalize_few_shot_prompt("./prompt/Step3-evaluate.json")
     prompt = """Imagine you're a storyteller. 
-    Evaluate the following poem, to what extent (1-5) does the poem is a good poem. Only give the number.
+    Evaluate the following poem, whether satiefied (1) or not satisfied (0) with the wish : {}. Only give the number.
     Poem: {}
     Output of number:
-    :""".format(story)
+    :""".format(wish,story)
     return prompt
 
 

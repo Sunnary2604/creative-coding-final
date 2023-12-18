@@ -1,35 +1,31 @@
-// Global variables for canvas dimensions, branching parameters, and color settings
 let width = window.innerWidth,
   height = window.innerHeight;
 let thetaVar = 10,
-  theta = 20; // Branch angle variability
-let startWidth = 10,
-  startLength = 100; // Initial branch dimensions
-let seed = 0; // Seed for random number generation
-let noiseVar = 1; // Wind effect variability
-let initial_color, final_color; // Colors for branch gradient
-let wind = 0; // Wind effect on branches
-let backgroundImg;
+  theta = 20;
+let seed = 0;
+let noiseVar = 1;
+let initial_color, final_color;
+let wind = 0;
 let iteration = 0;
 let t = 0;
 let MAXITERATION = 7;
 let TRANSITIONTIME = 50;
-let renderSize = false;
-let appleImg;
-let basketImg;
-let scrollImg;
-let frameImg;
-let backgorund_1;
-let penImg;
-let seedImg;
+let appleImg,
+  backgroundImg,
+  basketImg,
+  scrollImg,
+  frameImg,
+  sceneImg,
+  penImg,
+  seedImg,
+  instructionImg,
+  characterImg,
+  dialogImg;
 let score;
-let time = 0,
-  interaction_time = 0;
+let time = 0;
 let isSeed = true;
 let stage = 0;
 let step = 0;
-let imagesource = [];
-let appleTime = 0;
 let apples = [];
 let box = {};
 let word_in_box = [];
@@ -38,30 +34,32 @@ let story_keywords = [];
 let story = "";
 let type_index = 0;
 let speed = 1;
-let keywordsZone;
+let keywordsZone, storyZone;
 let store = [
-  "Peace",
-  "Love",
-  "Joy",
-  "Happiness",
-  "Hope",
-  "Kindness",
-  "Harmony",
-  "Beauty",
-  "Faith",
-  "Grace",
-  "Wisdom",
-  "Courage",
-  "Freedom",
-  "Magic",
-  "Wonder",
-  "Dream",
-  "Miracle",
-  "Bliss",
-  "Tranquility",
-  "Serenity",
+  "Rich",
+  "Healthy",
+  "Loved",
+  "Successful",
+  "Happy",
+  "Wealthy",
+  "Prosperous",
+  "Content",
+  "Fulfilled",
+  "Peaceful",
+  "Strong",
+  "Wise",
+  "Generous",
+  "Lucky",
+  "Creative",
+  "Confident",
+  "Independent",
+  "Adventurous",
+  "Grateful",
+  "Inspiring",
 ];
-let applePositions = [];
+let wish = "";
+let isNew = true;
+let storyCheck = false;
 
 function preload() {
   // load images
@@ -71,14 +69,17 @@ function preload() {
   scrollImg = loadImage("assets/image/scroll.png");
   frameImg = loadImage("assets/image/frame.png");
   penImg = loadImage("assets/image/pen.png");
-  backgorund_1 = loadImage("assets/image/background1.png");
+  sceneImg = loadImage("assets/image/background1.png");
   seedImg = loadImage("assets/image/seed.png");
+  characterImg = loadImage("assets/image/character1.png");
   instructionImg = loadImage("assets/image/instruction.png");
+  dialogImg = loadImage("assets/image/dialog.png");
   // load font
   font = loadFont("assets/font/jr!ha___.ttf");
 }
 // Initializes canvas and base settings
 function setup() {
+  initiate();
   createCanvas(windowWidth, windowHeight);
   angleMode(DEGREES);
   seed = random(1000);
@@ -97,15 +98,6 @@ function setup() {
     w: width * 0.15,
     h: height * 0.2,
   };
-  // initialize the words
-  for (let i = 0; i < 3; i++) {
-    let index = Math.floor(Math.random() * store.length);
-    if (new_words.includes(store[index])) {
-      i--;
-      continue;
-    }
-    new_words.push(store[index]);
-  }
 }
 
 function draw() {
@@ -114,12 +106,11 @@ function draw() {
   drawBox(keywordsZone, "keyword");
   drawBox(storyZone, "story");
   renderStoryWords();
-
+  renderStep();
   if (stage == 1) {
     if (time <= 10) {
       time += 0.05;
-    } 
-    interaction_time += 1;
+    }
     t = time;
 
     push();
@@ -128,7 +119,6 @@ function draw() {
       keywordsZone.x + keywordsZone.w / 2,
       keywordsZone.y + keywordsZone.h / 2
     );
-    applePositions = [];
     branch(60, t * 1.6, 0, 0, 0);
     pop();
   }
@@ -136,11 +126,19 @@ function draw() {
   // clear random seed
   randomSeed();
   for (let apple of apples) {
-    drawApple(apple, apples.indexOf(apple));
+    drawApple(apple);
   }
   renderInstruction();
+  if (score != undefined) {
+    showResult(score);
+  }
 }
-function drawApple(apple, index) {
+
+/**
+ *  Render the apple
+ * @param {Apple} apple
+ */
+function drawApple(apple) {
   if (apple.isDragging) {
     apple.x = mouseX + apple.dragOffsetX;
     apple.y = mouseY + apple.dragOffsetY;
@@ -148,28 +146,33 @@ function drawApple(apple, index) {
   apple.show();
 }
 
-function triggerFunction(text) {
-  stage = 1;
-  t = 0;
-  time = 0;
-  getKeywords(text);
-}
+/**
+ * Render the story words
+ * including the scroll, the story and the words
+ * check the score of the story
+ */
 function renderStoryWords() {
-  // render story words on the screen
-  image(scrollImg, 0, 0.01 * height, width * 0.35, height * 0.8);
-
+  image(scrollImg, 0, 0.01 * height, width * 0.4, height * 0.7);
   textSize(18);
-  renderStep();
+  fill(0);
   story = story.replace(",", " \n");
   story = story.replace(".", "\n");
-  text(story.substring(0, type_index), width * 0.175, height * 0.4);
+  text(story.substring(0, type_index), width * 0.2, height * 0.4);
 
   if (frameCount % speed == 0) {
     if (type_index < story.length) {
       type_index++;
     }
+    if (type_index == story.length && storyCheck) {
+      checkStory();
+      storyCheck = false;
+    }
   }
 }
+
+/**
+ * Render the 5 steps of the keyword selection
+ */
 function renderStep() {
   fill(0);
   textSize(20);
@@ -177,28 +180,30 @@ function renderStep() {
   for (let i = 0; i < story_keywords.length; i++) {
     image(
       penImg,
-      width * 0.515 + i * width * 0.075,
-      height * 0.85,
+      width * 0.5 + i * width * 0.1,
+      height * 0.8,
       height * 0.1,
       height * 0.1
     );
-    text(story_keywords[i], width * 0.5 + i * width * 0.075, height * 0.9);
+    text(story_keywords[i], width * 0.485 + i * width * 0.1, height * 0.9);
   }
 }
-
+/**
+ * watch the words in the trigger zone
+ * @param {*} box trigger zone
+ * @param {*} type  the type of the box (keyword or story)
+ */
 function watchWord(box, type) {
   if (type == "keyword") {
     for (let apple of apples) {
-      // if in the zone
       if (apple.isInside(box)) {
         if (apple.isSeed) {
-          triggerFunction(apple.text);
+          getKeywords(apple.text);
           apples.splice(apples.indexOf(apple), 1);
         }
       }
     }
-  }
-  if (type == "story") {
+  } else if (type == "story") {
     for (let apple of apples) {
       // if in the zone
       if (apple.isInside(box)) {
@@ -213,9 +218,12 @@ function watchWord(box, type) {
     }
   }
 }
-
+/**
+ *  Draw the trigger zone
+ * @param {*} box  the triger zone
+ * @param {*} type the type of the box (keyword or story)
+ */
 function drawBox(box, type) {
-  // brown
   fill(139, 69, 19);
   if (type == "keyword") {
     noFill();
@@ -224,15 +232,13 @@ function drawBox(box, type) {
     image(basketImg, box.x, box.y, box.w, box.h);
   }
 }
-function mousePressed() {
-  for (let apple of apples) {
-    apple.checkPressed();
-  }
-}
+
+/**
+ * Create apples based on the keywords
+ * Could be apple or seed
+ */
 function createApple() {
-  // for each item in new_words, create an apple
   for (let word of new_words) {
-    // check if the word is already in the apple list
     let isExist = false;
     for (let apple of apples) {
       if (apple.text == word) {
@@ -241,13 +247,13 @@ function createApple() {
       }
     }
     if (isExist) continue;
-    if (!store.includes(word)) {
+    if (!isNew) {
       apples.push(
         new Apple(
           random(width * 0.65, width * 0.8),
           random(height * 0.15, height * 0.25),
           word,
-          store.includes(word)
+          isNew
         )
       );
     } else {
@@ -256,38 +262,57 @@ function createApple() {
           random(width * 0.5, width * 0.95),
           random(height * 0.8, height * 0.95),
           word,
-          store.includes(word)
+          isNew
         )
       );
     }
   }
   new_words = [];
 }
-
-function mouseReleased() {
-  for (let apple of apples) {
-    apple.checkReleased();
-  }
-  watchWord(keywordsZone, "keyword");
-  watchWord(storyZone, "story");
-}
-
-function mouseDragged() {
-  for (let apple of apples) {
-    if (apple.isDragging) {
-      apple.x = mouseX + apple.dragOffsetX;
-      apple.y = mouseY + apple.dragOffsetY;
-    }
-  }
-}
-
+/**
+ * Render the background including the paper, the frame, the scene and the character
+ */
 function renderBackground() {
   image(backgroundImg, 0, 0, width, height);
-
-  image(backgorund_1, width * 0.45, height * 0.13, width * 0.5, height * 0.5);
+  image(sceneImg, width * 0.45, height * 0.13, width * 0.5, height * 0.5);
   image(frameImg, width * 0.4, 0, width * 0.6, height * 0.8);
+  renderCharacter();
 }
-// Draws a tree branch with recursive subdivision
+
+/**
+ * Render the character and the dialog
+ */
+function renderCharacter() {
+  // character
+  image(characterImg, width * 0.1, height * 0.8, height * 0.2, height * 0.2);
+  // dialog
+  image(dialogImg, width * 0.25, height * 0.75, width * 0.2, height * 0.25);
+
+  // split the text into two lines
+
+  let wishes = wish.split(" ");
+  let wish_text = "";
+  for (let i = 0; i < wishes.length; i++) {
+    if (i % 5 == 0 && i != 0) {
+      wishes[i] = wishes[i] + "\n";
+    }
+
+    wish_text += wishes[i] + " ";
+  }
+  fill(0);
+  textSize(18);
+  textAlign(CENTER, CENTER);
+  text(wish_text, width * 0.35, height * 0.85);
+}
+
+/**
+ *
+ * @param {Number} len  The length of the branch
+ * @param {Number} thickness  The thickness of the branch
+ * @param {Number} iteration  The current iteration
+ * @param {Number} x  The x coordinate of the branch
+ * @param {Number} y  The y coordinate of the branch
+ */
 function branch(len, thickness, iteration, x, y) {
   stroke(0);
   strokeWeight(thickness);
@@ -347,6 +372,15 @@ function branch(len, thickness, iteration, x, y) {
     }
   }
 }
+
+/**
+ *  Draws an S-curve with random control points
+ * @param {Number} startX  The starting x coordinate
+ * @param {Number} startY  The starting y coordinate
+ * @param {Number} endX  The ending x coordinate
+ * @param {Number} endY  The ending y coordinate
+ * @param {Number} iteration   The current iteration
+ */
 function drawSCurve(startX, startY, endX, endY, iteration) {
   push();
   translate(startX, startY);
@@ -408,29 +442,37 @@ function drawLeaves(len, recursive_level) {
 
   pop();
 }
-function drawHandDrawnCircle(x, y, diameter) {
-  push(); // Start a new drawing state
-  translate(x, y); // Move to the center of the circle
-
-  beginShape();
-  let radius = diameter / 2;
-  for (let angle = 0; angle < 360; angle += 1) {
-    // Adding randomness to the radius to create the irregular effect using noise
-    let tempRadius = radius + noise(angle / 10, frameCount / 100) * 10;
-    let x = tempRadius * cos(angle);
-    let y = tempRadius * sin(angle);
-    vertex(x, y);
-  }
-  endShape(CLOSE); // CLOSE to connect the shape back to the beginning
-
-  pop(); // Restore original state
+/**
+ * Get related keywords from the openai api
+ */
+function initiate() {
+  axios
+    .post("http://127.0.0.1:5000/initiate", {
+      keyword: store[Math.floor(Math.random() * store.length)],
+    })
+    .then(function (response) {
+      console.log(response.data);
+      wish = response.data.wish;
+      new_words = response.data.related;
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
 }
+/**
+ * Get related keywords from the openai api
+ * @param {String} text the user selected text
+ */
 function getKeywords(text) {
+  stage = 1;
+  t = 0;
+  time = 0;
   axios
     .post("http://127.0.0.1:5000/getKeywords", {
       user_input: text,
     })
     .then(function (response) {
+      isNew = false;
       console.log(response.data);
       if (Array.isArray(response.data)) {
         new_words = response.data;
@@ -440,29 +482,35 @@ function getKeywords(text) {
       console.log(error);
     });
 }
-
-function getStory(text) {
+/**
+ * Get a poem from the openai api, based on the keywords
+ * @param {Array} keywords the user selected keywords
+ */
+function getStory(keywords) {
   axios
     .post("http://127.0.0.1:5000/getStory", {
-      keywords: text,
+      keywords: keywords,
     })
     .then(function (response) {
       story = response.data;
       type_index = 0;
-      checkStory();
-      console.log(story);
 
+      console.log(story);
+      storyCheck = true;
       word_in_box = [];
     })
     .catch(function (error) {
       console.log(error);
     });
 }
+/**
+ * Check the story score from the openai api
+ */
 function checkStory() {
   axios
     .post("http://127.0.0.1:5000/checkStory", {
       story: story,
-      keywords: story_keywords[0],
+      wish: wish,
     })
     .then(function (response) {
       score = response.data;
@@ -472,7 +520,9 @@ function checkStory() {
       console.log(error);
     });
 }
-// if change screen size, resize canvas
+/**
+ * Resize the canvas when the window size changes
+ */
 function windowResized() {
   width = window.innerWidth;
   height = window.innerHeight;
@@ -480,9 +530,66 @@ function windowResized() {
   resizeCanvas(width, height);
 }
 
+/**
+ * Render instruction when press i
+ */
 function renderInstruction() {
   if (keyIsPressed && key == "i") {
     background(0, 0, 0, 150);
     image(instructionImg, width * 0.1, height * 0.1, width * 0.8, height * 0.8);
+  }
+  if (keyIsPressed && key == "r") {
+    location.reload();
+  }
+}
+
+/**
+ * Render the result when the story is scored
+ */
+function showResult() {
+  background(0, 0, 0, 150);
+  fill(255);
+  textSize(40);
+  textAlign(CENTER, CENTER);
+  let wishes = wish.split(" ");
+  let wish_text = "";
+  for (let i = 0; i < wishes.length; i++) {
+    if (i % 10 == 0 && i != 0) {
+      wishes[i] = wishes[i] + "\n";
+    }
+
+    wish_text += wishes[i] + " ";
+  }
+  text("'" + wish_text + "'", width / 2, height * 0.4);
+  if (score == 1)
+    text("Thanks for making it come true!", width / 2, height * 0.6);
+  else text("You almost make it come true!", width / 2, height * 0.6);
+  textSize(20);
+  text("Press r to restart", width / 2, height * 0.8);
+}
+
+////////////////////////
+// Mouse Event
+////////////////////////
+
+function mouseReleased() {
+  for (let apple of apples) {
+    apple.checkReleased();
+  }
+  watchWord(keywordsZone, "keyword");
+  watchWord(storyZone, "story");
+}
+
+function mouseDragged() {
+  for (let apple of apples) {
+    if (apple.isDragging) {
+      apple.x = mouseX + apple.dragOffsetX;
+      apple.y = mouseY + apple.dragOffsetY;
+    }
+  }
+}
+function mousePressed() {
+  for (let apple of apples) {
+    apple.checkPressed();
   }
 }

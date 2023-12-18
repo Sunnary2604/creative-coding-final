@@ -4,6 +4,13 @@
       "keyword": "healthy",
       "poem": "In a world of dreams and whispered prayers,\nWhere hopes and wishes fill the air,\nThere lived a soul, both young and bold,\nWhose fervent wish, a tale to be told,\nTo mend their body, weak and frail.\n\nSection 1: The Seed of Desire\n\nIn a quiet garden, where flowers bloom,\nLived a child with heart abloom.\nA wish was born within their chest,\nA wish for health, a wish for best,\nThey longed to chase the pain away.\n\nSection 2: A Journey of Discovery\n\nThrough valleys low and mountains high,\nThey sought the truth 'neath the endless sky.\nThey sought the wisdom of ancient lore,\nTo heal their body, spirit, and core,\nIn nature's embrace, they'd find their way.\n\nSection 3: Trials and Tribulations\n\nThe path to health was not a breeze,\nBut a tumultuous sea with no calm ease.\nThey faced trials, fierce and strong,\nYet never wavered, never went wrong,\nWith courage as their guiding star.\n\nSection 4: The Radiant Transformation\n\nWith time and patience, they found their grace,\nA transformation, a radiant embrace.\nTheir body healed, their spirit soared,\nTheir wish for health completely restored,\nA phoenix rising from the ashes.\n\nSection 5: The Legacy of the Wish\n\nNow their story is a tale retold,\nOf wishes for health, both young and old.\nA reminder that dreams can take flight,\nIf we hold them close, with all our might,\nAnd keep the flame of hope alive."
     },
-    "output": 5
+    "output": 1
+  },
+  {
+    "input": {
+      "keyword": "wealthy",
+      "poem": "In a world of dreams and whispered prayers,\nWhere hopes and wishes fill the air,\nThere lived a soul, both young and bold,\nWhose fervent wish, a tale to be told,\nTo mend their body, weak and frail.\n\nSection 1: The Seed of Desire\n\nIn a quiet garden, where flowers bloom,\nLived a child with heart abloom.\nA wish was born within their chest,\nA wish for health, a wish for best,\nThey longed to chase the pain away.\n\nSection 2: A Journey of Discovery\n\nThrough valleys low and mountains high,\nThey sought the truth 'neath the endless sky.\nThey sought the wisdom of ancient lore,\nTo heal their body, spirit, and core,\nIn nature's embrace, they'd find their way.\n\nSection 3: Trials and Tribulations\n\nThe path to health was not a breeze,\nBut a tumultuous sea with no calm ease.\nThey faced trials, fierce and strong,\nYet never wavered, never went wrong,\nWith courage as their guiding star.\n\nSection 4: The Radiant Transformation\n\nWith time and patience, they found their grace,\nA transformation, a radiant embrace.\nTheir body healed, their spirit soared,\nTheir wish for health completely restored,\nA phoenix rising from the ashes.\n\nSection 5: The Legacy of the Wish\n\nNow their story is a tale retold,\nOf wishes for health, both young and old.\nA reminder that dreams can take flight,\nIf we hold them close, with all our might,\nAnd keep the flame of hope alive."
+    },
+    "output": 0
   }
 ]

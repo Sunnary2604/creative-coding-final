@@ -64,13 +64,3 @@ class Apple {
     );
   }
 }
-function triggerFunction(apple) {
-  console.log("Triggered with apple: " + apple.word);
-
-  apple.x = -10000;
-  getdata(apple.word);
-  stage = 1;
-  t = 0;
-  time = 0;
-  // initApple()
-}
